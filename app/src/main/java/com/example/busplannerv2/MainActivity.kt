@@ -11,6 +11,9 @@ import retrofit2.Response
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import retrofit2.create
+import java.text.SimpleDateFormat
+import java.util.Calendar
+import java.util.Date
 import kotlin.math.round
 
 var myString = StringBuilder()
@@ -24,6 +27,7 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
         val goButton = findViewById<Button>(R.id.goButton)
         val updateText = findViewById<TextView>(R.id.busAPI)
+        val sdf = SimpleDateFormat("hh:mm")
 
         fun getData1() {
             val retrofitBuilder = Retrofit.Builder()
@@ -47,11 +51,11 @@ class MainActivity : AppCompatActivity() {
                     myStringBuilder.append("Stop: $stopName ($stopNo) \n" )
                     myStringBuilder.append("Route no.$routeNo, \nDirection: $route\n")
                     for(trips in responseBody.GetNextTripsForStopResult.Route.RouteDirection.Trips.Trip){
+                        val currentDate = Calendar.getInstance()
                         val lastUpdated = trips.AdjustmentAge
                         val ETA = trips.AdjustedScheduleTime
-
-
-                        myStringBuilder.append("Next arrival: $ETA minutes \n")
+                        currentDate.add(Calendar.MINUTE, ETA.toInt())
+                        myStringBuilder.append("Next arrival: $ETA minutes (${sdf.format(currentDate.time)})\n")
                         if(lastUpdated != "-1") {
                             val lastUpdatedDouble = lastUpdated.toDouble()
                             val lastUpdatedSecond = round(lastUpdatedDouble*60).toInt()
