@@ -51,7 +51,7 @@ class MainActivity : AppCompatActivity() {
                         val ETA = trips.AdjustedScheduleTime
 
 
-                        myStringBuilder.append("Next arrival: $ETA \n")
+                        myStringBuilder.append("Next arrival: $ETA minutes \n")
                         if(lastUpdated != "-1") {
                             val lastUpdatedDouble = lastUpdated.toDouble()
                             val lastUpdatedSecond = round(lastUpdatedDouble*60).toInt()
