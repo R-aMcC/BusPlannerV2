@@ -60,64 +60,84 @@ class MainActivity : AppCompatActivity() {
                     val Route = responseBody.GetNextTripsForStopResult.Route.toString()
                     val RouteJSON = responseBody.GetNextTripsForStopResult.Route
                     if(Route[18].toString() == "["){
-                        Log.d("Route[18]", "YES")
-                        // Treat as list
-                    }else{
-                        Log.d("Route[18]", "NO")
-                        //treat as item
-
-                        val data = Gson().fromJson(responseBody.GetNextTripsForStopResult.Route, ApiResponse::class.java)
-
-                        Log.d("data", "${data.RouteDirection}")
-                        val route = data.RouteDirection.RouteLabel
-                        val routeNo = data.RouteDirection.RouteNo
+                        try{
 
 
-                        Log.d("responseBody", "$responseBody")
-                        myStringBuilder.append("Stop: $stopName ($stopNo) \n" )
-                        myStringBuilder.append("Route no.$routeNo, \nDirection: $route\n")
-                        for(trips in data.RouteDirection.Trips.Trip){
-                            val currentDate = Calendar.getInstance()
-                            val lastUpdated = trips.AdjustmentAge
-                            val ETA = trips.AdjustedScheduleTime
-                            currentDate.add(Calendar.MINUTE, ETA.toInt())
-                            myStringBuilder.append("Next arrival: $ETA minutes (${sdf.format(currentDate.time)})\n")
-                            if(lastUpdated != "-1") {
-                                val lastUpdatedDouble = lastUpdated.toDouble()
-                                val lastUpdatedSecond = round(lastUpdatedDouble*60).toInt()
-                                myStringBuilder.append("Last updated: $lastUpdatedSecond seconds ago\n")
+                            val data = Gson().fromJson(responseBody.GetNextTripsForStopResult.Route, RouteList::class.java)
 
-                            }
-                        }
-                    }
+                            Log.d("data", "${data.RouteDirection}")
 
-/*
-
-*/
-/*
-                    for(routes in responseBody.GetNextTripsForStopResult.Route.RouteDirection){
-                        val route = routes.RouteLabel
-                        val routeNo = routes.RouteNo
+                            for(routes in data.RouteDirection){
+                                val route = routes.RouteLabel
+                                val routeNo = routes.RouteNo
 
 
-                        Log.d("responseBody", "$responseBody")
-                        myStringBuilder.append("Stop: $stopName ($stopNo) \n" )
-                        myStringBuilder.append("Route no.$routeNo, \nDirection: $route\n")
-                        for(trips in routes.Trips.Trip){
-                            val currentDate = Calendar.getInstance()
-                            val lastUpdated = trips.AdjustmentAge
-                            val ETA = trips.AdjustedScheduleTime
-                            currentDate.add(Calendar.MINUTE, ETA.toInt())
-                            myStringBuilder.append("Next arrival: $ETA minutes (${sdf.format(currentDate.time)})\n")
-                            if(lastUpdated != "-1") {
-                                val lastUpdatedDouble = lastUpdated.toDouble()
-                                val lastUpdatedSecond = round(lastUpdatedDouble*60).toInt()
-                                myStringBuilder.append("Last updated: $lastUpdatedSecond seconds ago\n")
+
+                                Log.d("responseBody", "$responseBody")
+                                myStringBuilder.append("Stop: $stopName ($stopNo) \n" )
+                                myStringBuilder.append("Route no.$routeNo, \nDirection: $route\n")
+
+                                for(trips in routes.Trips.Trip){
+                                    val currentDate = Calendar.getInstance()
+                                    val lastUpdated = trips.AdjustmentAge
+                                    val ETA = trips.AdjustedScheduleTime
+                                    currentDate.add(Calendar.MINUTE, ETA.toInt())
+                                    myStringBuilder.append("Next arrival: $ETA minutes (${sdf.format(currentDate.time)})\n")
+                                    if(lastUpdated != "-1") {
+                                        val lastUpdatedDouble = lastUpdated.toDouble()
+                                        val lastUpdatedSecond = round(lastUpdatedDouble*60).toInt()
+                                        myStringBuilder.append("Last updated: $lastUpdatedSecond seconds ago\n")
+
+                                    }
+                                }
 
                             }
+                        }catch(ex: Exception){
+                            myStringBuilder.append("Something went wrong. Please try again later")
+                        }
+
+
+                    }else if(Route[18].toString() == "{") {
+                        try {
+
+                            Log.d("Route[18]", "NO")
+
+                            val data = Gson().fromJson(
+                                responseBody.GetNextTripsForStopResult.Route,
+                                ApiResponse::class.java
+                            )
+
+                            Log.d("data", "${data.RouteDirection}")
+                            val route = data.RouteDirection.RouteLabel
+                            val routeNo = data.RouteDirection.RouteNo
+
+
+                            Log.d("responseBody", "$responseBody")
+                            myStringBuilder.append("Stop: $stopName ($stopNo) \n")
+                            myStringBuilder.append("Route no.$routeNo, \nDirection: $route\n")
+                            for (trips in data.RouteDirection.Trips.Trip) {
+                                val currentDate = Calendar.getInstance()
+                                val lastUpdated = trips.AdjustmentAge
+                                val ETA = trips.AdjustedScheduleTime
+                                currentDate.add(Calendar.MINUTE, ETA.toInt())
+                                myStringBuilder.append(
+                                    "Next arrival: $ETA minutes (${
+                                        sdf.format(
+                                            currentDate.time
+                                        )
+                                    })\n"
+                                )
+                                if (lastUpdated != "-1") {
+                                    val lastUpdatedDouble = lastUpdated.toDouble()
+                                    val lastUpdatedSecond = round(lastUpdatedDouble * 60).toInt()
+                                    myStringBuilder.append("Last updated: $lastUpdatedSecond seconds ago\n")
+
+                                }
+                            }
+                        }catch(ex: Exception){
+                            myStringBuilder.append("Something went wrong. Please try again later.")
                         }
                     }
-*/
 
                     myString = myStringBuilder
                     updateText.text = myString
